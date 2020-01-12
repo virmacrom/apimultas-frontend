@@ -37,7 +37,7 @@ class Multas extends React.Component{
     }
     
     handleEdit(multa, _id){
-      //  MultasApi.updateMulta(multa,_id);
+        MultasApi.updateMulta(multa,_id);
         this.setState(prevState => ({
             isEditing: {...prevState.isEditing, [multa._id]: multa}
         }));
@@ -54,7 +54,7 @@ class Multas extends React.Component{
     }
 
     handleDelete(multa,_id){
-      //  MultasApi.deleteMulta(multa,_id);
+        MultasApi.deleteMulta(multa,_id);
 
             this.setState(prevState => ({
                 multas: prevState.multas.filter((c) => c._id !== multa._id)
@@ -68,7 +68,7 @@ class Multas extends React.Component{
     }
 
     handleSave(_id, multa){
-      //  MultasApi.updateMulta(multa,_id);
+        MultasApi.updateMulta(multa,_id);
         this.setState(prevState =>{
             const isEditing = Object.assign({}, prevState.isEditing);
             delete isEditing[_id];
@@ -95,7 +95,7 @@ class Multas extends React.Component{
     }
 
     addMulta(multa,dni,concepto,puntos,importe) {
-      //  MultasApi.addMulta(multa,dni,concepto,puntos,importe).then(
+        MultasApi.addMulta(multa,dni,concepto,puntos,importe).then(
             this.setState(prevState => {
                 const multas = prevState.multas;
                 if (!multas.find(c => c.dni === multas.dni)){
@@ -107,7 +107,7 @@ class Multas extends React.Component{
                     errorInfo: ' El usuario ya existe'
                 });
             })
-      //  )
+        )
     }
 
     render(){
