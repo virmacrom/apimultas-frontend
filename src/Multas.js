@@ -3,7 +3,7 @@ import Multa from './Multa.js';
 import NewMulta from './NewMulta.js';
 import EditMulta from './EditMulta.js';
 import Alert from './Alert.js';
-//import MultasApi from './MultasApi';
+import MultasApi from './MultasApi';
 
 class Multas extends React.Component{
     constructor(props){
@@ -21,19 +21,19 @@ class Multas extends React.Component{
     }
 
     componentDidMount() {
-      //  MultasApi.getAllMultas()
-         //   .then(
-           //     (result) => {
+        MultasApi.getAllMultas()
+            .then(
+                (result) => {
                     this.setState({
-                     //   multas: result
+                        multas: result
                     })
-           //     },
-              //  (error) => {
+                },
+                (error) => {
                     this.setState({
                         errorInfo: "Problemas con la conexion al servidor"
                     })
-            //    }          
-          //  )
+                }          
+            )
     }
     
     handleEdit(multa, _id){
