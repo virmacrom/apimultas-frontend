@@ -9,7 +9,7 @@ class MultasApi{
 
     static getAllMultas(){
         const headers = this.requestHeaders();
-        const request = new Request(MultasApi.API_BASE_URL + "/multas?apikey=fbce18d8-2f6a-4e40-9a94-d8551eab2362",{
+        const request = new Request(MultasApi.API_BASE_URL + "/multas?apikey=dd94326d-dd29-448d-85d6-7bb335eb9151",{
             method: 'GET',
             headers:headers
         });
