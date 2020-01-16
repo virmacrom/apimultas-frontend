@@ -4,6 +4,7 @@ import NewMulta from './NewMulta.js';
 import EditMulta from './EditMulta.js';
 import Alert from './Alert.js';
 import MultasApi from './MultasApi';
+import PuntosApi from './PuntosApi';
 
 class Multas extends React.Component{
     constructor(props){
@@ -108,6 +109,8 @@ class Multas extends React.Component{
                 });
             })
         )
+
+        PuntosApi.restarPuntos(dni,puntos);
     }
 
     render(){
