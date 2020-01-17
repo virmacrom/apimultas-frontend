@@ -11,9 +11,21 @@ function App() {
   return (
     <div>
       <Container>
-            <Row>
-              <h1>Registro de multas</h1>
-            </Row>
+
+      <Row>
+        <br/>
+            <Col sm={10}> </Col>
+              <br/>
+          </Row>
+        
+      <div align='center'>
+      <h1 >Registro de multas</h1></div>
+      <br/>
+      
+
+          <Row>
+          </Row>
+
             <Row>
               <Col>
                 <Multas>

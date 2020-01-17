@@ -41,7 +41,8 @@ class NewMulta extends React.Component {
                 <td><input className="form-control" id="concepto" name="concepto" value={this.state.concepto} onChange={this.changeMulta}/></td>
                 <td><input className="form-control" id="puntos" name="puntos" value={this.state.puntos} onChange={this.changeMulta}/></td>
                 <td><input className="form-control" id="importe" name="importe" value={this.state.importe} onChange={this.changeMulta}/></td>
-                <td><button className="btn btn-primary" onClick={this.clickAdd}>Añadir multa</button></td>
+                <td><button className="btn btn-success" onClick={this.clickAdd}>Añadir multa</button></td>
+                <td></td>
             </tr>
             
         );

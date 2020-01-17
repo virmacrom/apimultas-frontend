@@ -5,6 +5,7 @@ import EditMulta from './EditMulta.js';
 import Alert from './Alert.js';
 import MultasApi from './MultasApi';
 import PuntosApi from './PuntosApi';
+import BuscarRegistro from './BuscarRegistro.js';
 
 class Multas extends React.Component{
     constructor(props){
@@ -12,21 +13,56 @@ class Multas extends React.Component{
         this.state = {
             errorInfo: null,
             multas: [], // this.props.multas,
+            multasBackup: [],
             isEditing: {}
         };
         this.handleEdit = this.handleEdit.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleCloseError = this.handleCloseError.bind(this);
+        this.handdleSearch= this.handdleSearch.bind(this);
+        this.handleShowAll=this.handleShowAll.bind(this);
         this.addMulta = this.addMulta.bind(this);
 
     }
+
+    handleShowAll(){
+        this.setState({
+            multas: this.state.multasBackup
+        });
+    }
+
+    handdleSearch(dni){
+       // const multas=this.state.multas;
+        const multasBackup=this.state.multasBackup;
+
+        if(dni===''){
+            this.setState(prevState=>({
+                errorInfo:"Introduzca un DNI",
+                multas:this.state.multasBackup
+            }))
+        }
+
+        else if(!multasBackup.find(c=>c.dni === dni)){
+            this.setState(prevState=>({
+                errorInfo:"No existe carnet con el DNI: "+dni,
+                multas:this.state.multasBackup
+            }))
+        }
+
+        else{
+            this.setState(prevState=>({  
+                multas: prevState.multasBackup.filter((c)=>c.dni === dni)                            
+            }))  
+        }
+    }  
 
     componentDidMount() {
         MultasApi.getAllMultas()
             .then(
                 (result) => {
                     this.setState({
-                        multas: result
+                        multas: result,
+                        multasBackup:result
                     })
                 },
                 (error) => {
@@ -34,8 +70,8 @@ class Multas extends React.Component{
                         errorInfo: "Problemas con la conexion al servidor"
                     })
                 }          
-            )
-    }
+           )
+   }
     
     handleEdit(multa, _id){
         MultasApi.updateMulta(multa,_id);
@@ -58,35 +94,56 @@ class Multas extends React.Component{
         MultasApi.deleteMulta(multa,_id);
 
             this.setState(prevState => ({
-                multas: prevState.multas.filter((c) => c._id !== multa._id)
+                multas: prevState.multas.filter((c)=>c._id!== multa._id),
+                multasBackup: prevState.multas.filter((c)=>c._id!== multa._id),
+                errorInfo: "Registro eliminado correctamente"
             }))         
     }
 
     handleChange(_id, multa){
         this.setState(prevState => ({
             isEditing: {...prevState.isEditing, [_id]: multa}
+         
         }))
     }
 
     handleSave(_id, multa){
-        MultasApi.updateMulta(multa,_id);
-        this.setState(prevState =>{
-            const isEditing = Object.assign({}, prevState.isEditing);
-            delete isEditing[_id];
 
-            if (_id===multa._id){
-                const multas = prevState.multas;
-                const pos = multas.findIndex(c => c._id === multa._id);
-                return {
-                    multas: [...multas.slice(0,pos), Object.assign({}, multa), ...multas.slice(pos+1)],
-                    isEditing: isEditing
-                }
+        if(multa.dni!==""){
+
+            if(!this.comprobarDNI(multa.dni)){
+
+                this.setState({
+                    errorInfo:"Formato de DNI no válido"
+                })
+
+            }else if(this.comprobarDNI(multa.dni)){
+                MultasApi.updateMulta(multa,_id);
+                this.setState(prevState =>{
+                    const isEditing = Object.assign({}, prevState.isEditing);
+                    delete isEditing[_id];
+
+                    if (_id===multa._id){
+                        const multas = prevState.multas;
+                        const pos = multas.findIndex(c => c._id === multa._id);
+                        return {
+                            multas: [...multas.slice(0,pos), Object.assign({}, multa), ...multas.slice(pos+1)],
+                            errorInfo: "Registro modificado correctamente",
+                            isEditing: isEditing
+                        }
+                    }
+        
+                    return{
+                        errorInfo: "No se puede editar el registro",
+                    }
+                });
             }
- 
-            return{
-                errorInfo: "Cannot edit id",
-            }
-        });
+        }else{
+            this.setState({
+                errorInfo:"El campo DNI no puede estar vacío"
+            })
+
+        }
     }
 
     handleCloseError() {
@@ -95,35 +152,98 @@ class Multas extends React.Component{
         });
     }
 
-    addMulta(multa,dni,concepto,puntos,importe) {
-        MultasApi.addMulta(multa,dni,concepto,puntos,importe).then(
-            this.setState(prevState => {
-                const multas = prevState.multas;
-                if (!multas.find(c => c.dni === multas.dni)){
-                    return({
-                        multas: [...prevState.multas, multa]
-                    });
-                }
-                return({
-                    errorInfo: ' El usuario ya existe'
-                });
-            })
-        )
+    comprobarDNI(dni) {
+        var numero
+        var letr
+        var letra
+        var expresion_regular_dni
+       
+        expresion_regular_dni = /^\d{8}[a-zA-Z]$/;
+       
+        if(expresion_regular_dni.test (dni) === true){
+           numero = dni.substr(0,dni.length-1);
+           letr = dni.substr(dni.length-1,1);
+           numero = numero % 23;
+           letra='TRWAGMYFPDXBNJZSQVHLCKET';
+           letra=letra.substring(numero,numero+1);
+          if (letra!==letr.toUpperCase()) {
+            return true;
+           }
+        }else{
+            
+           return false;
+         }    
+    
+    }
 
-        PuntosApi.restarPuntos(dni,puntos);
+    addMulta(multa,dni,concepto,puntos,importe) {
+
+        if(dni!=="" && concepto !=="" && puntos!=="" && importe!==""){
+
+            if(!this.comprobarDNI(dni)){
+
+                this.setState({
+                    errorInfo:"Formato de DNI no válido"
+                })
+
+            }else if(this.comprobarDNI(dni)){
+                let regex = new RegExp("^[ñíóáéú a-zA-Z ]+$");
+
+            if (!regex.test(concepto)) {
+           
+                this.setState({
+                    errorInfo:"El concepto solo debe contener letras"
+                })
+                return;
+            }
+
+
+            MultasApi.addMulta(multa,dni,concepto,puntos,importe).then(
+                this.setState(prevState => {
+                    const multas = prevState.multas;
+                    if (!multas.find(c => c.dni === multas.dni)){
+                        return({
+                            multas: [...prevState.multas, multa],
+                            errorInfo: "Registro añadido correctamente"
+                        });
+                    }
+                    return({
+                        errorInfo: ' El usuario ya existe'
+                    });
+                })
+            )
+            PuntosApi.restarPuntos(dni,puntos);
+            }
+
+        }else{
+
+            this.setState({
+                errorInfo:"Los campos no pueden estar vacío"
+
+            })
+        } 
+    
     }
 
     render(){
         return(
             <div>
                 <Alert message={this.state.errorInfo} onClose={this.handleCloseError}/>
-             <table className="table">
+                <br/>
+                <div>
+                    <BuscarRegistro onAddDNI={this.handdleSearch} showAll={this.handleShowAll}></BuscarRegistro><br></br>
+                </div>
+             <br/>
+             <br/>
+             <table id="dtBasicExample" className="table-striped table-bordered table-sm" cellspacing="0" width="100%">
                 <thead>
-                    <tr>
+                    <tr align="center">
                         <th>DNI</th>
                         <th>Concepto</th>
                         <th>Puntos restados</th>
                         <th>Importe</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,9 +261,12 @@ class Multas extends React.Component{
                 )}   
             </tbody>
             </table>
+            <br/>
+            <br/>
             </div>
         );
     }
+
 }
 
 
